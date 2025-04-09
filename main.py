@@ -7,8 +7,8 @@ from pipeline_flux_controlnet_inpaint import FluxControlNetInpaintingPipeline
 check_min_version("0.30.2")
 
 # Set image path , mask path and prompt
-image_path='https://huggingface.co/alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Alpha/resolve/main/images/bucket.png',
-mask_path='https://huggingface.co/alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Alpha/resolve/main/images/bucket_mask.jpeg',
+image_path='https://huggingface.co/alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Alpha/resolve/main/images/bucket.png'
+mask_path='https://huggingface.co/alimama-creative/FLUX.1-dev-Controlnet-Inpainting-Alpha/resolve/main/images/bucket_mask.jpeg'
 prompt='a person wearing a white shoe, carrying a white bucket with text "FLUX" on it'
 
 # Build pipeline
