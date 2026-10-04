@@ -236,7 +236,7 @@ function renderForecast() {
   <p class="small muted">Modelo estatístico simples e transparente — não é previsão oficial. Pesquisas erram; o erro histórico de institutos no Brasil costuma passar de 3 p.p. por candidato.</p>`;
   chart('chFc', { type: 'bar', data: { labels: keys.map(k => cand(k).name), datasets: [{ data: keys.map(k => +App.avg[k].toFixed(1)), backgroundColor: keys.map(k => cand(k).color) }] },
     options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${f1(c.parsed.y)} (IC90: ${f1(s.ci[keys[c.dataIndex]][0])} – ${f1(s.ci[keys[c.dataIndex]][1])})` } } }, scales: { y: { ticks: { callback: v => v + '%' } } } } });
-  $$('#forecast input[type=range]').forEach(r => r.oninput = () => { const k = r.dataset.k; if (k === 'noise') Model.runoffNoise = +r.value; else if (k === 'rest') Model.restToLula = +r.value; else Model.transfer[k] = +r.value; $('#tv_' + k).textContent = r.value; clearTimeout(App.t); App.t = setTimeout(() => { App.sim = Model.simulate(App.avg, 12000); renderForecast(); renderOverview(); }, 350); });
+  $$('#forecast input[type=range]').forEach(r => r.oninput = () => { const k = r.dataset.k; if (k === 'noise') Model.runoffNoise = +r.value; else if (k === 'rest') Model.restToLula = +r.value; else Model.transfer[k] = +r.value; $('#tv_' + k).textContent = r.value; clearTimeout(App.t); App.t = setTimeout(() => { App.sim = Model.simulate(App.avg, 12000); nowcast(); renderForecast(); renderOverview(); renderProb(); }, 350); });
   $$('#forecast tr.click').forEach(r => r.onclick = () => { go('map'); selectState(r.dataset.uf); });
 }
 
