@@ -4,7 +4,7 @@ const CANDIDATES = {
   flavio:   { name: 'Flávio Bolsonaro', full: 'Flávio Bolsonaro',          party: 'PL',     color: '#1d6fd8', match: ['FLAVIO'], num: 22, role: 'Senador (RJ)' },
   cury:     { name: 'Augusto Cury',    full: 'Augusto Cury',              party: 'Avante', color: '#e0a100', match: ['CURY'], num: 70, role: 'Psiquiatra e escritor' },
   caiado:   { name: 'Ronaldo Caiado',  full: 'Ronaldo Caiado',            party: 'PSD',    color: '#0f9d8a', match: ['CAIADO'], num: 55, role: 'Ex-governador de Goiás' },
-  renan:    { name: 'Renan Santos',    full: 'Renan Santos',              party: 'Missão', color: '#7b2cbf', match: ['RENAN'], num: 35, role: 'Empreendedor / MBL' },
+  renan:    { name: 'Renan Santos',    full: 'Renan Santos',              party: 'Missão', color: '#7b2cbf', match: ['RENAN'], num: 14, role: 'Empreendedor / MBL' },
   zema:     { name: 'Romeu Zema',      full: 'Romeu Zema',                party: 'Novo',   color: '#ff7a00', match: ['ZEMA'], num: 30, role: 'Ex-governador de Minas Gerais' },
   marcal:   { name: 'Pablo Marçal',    full: 'Pablo Marçal',              party: 'PRTB',   color: '#6c757d', match: ['MARCAL'], num: 28, role: 'Candidatura sub judice (inelegibilidade em análise no TSE)' },
   /* candidatos de 2022 – usados no modo "Replay 2022" */
