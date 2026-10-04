@@ -1,8 +1,10 @@
 /* Modelo de previsão: média ponderada de pesquisas + Monte Carlo + projeção por estado (swing sobre 2022). */
 const Model = {
   halfLifeDays: 14,
-  /* % de eleitores de cada candidato eliminado que migra para Flávio no 2º turno (restante → Lula) */
-  transfer: { cury: 50, caiado: 70, renan: 60, zema: 75, marcal: 65 },
+  /* % dos eleitores de cada candidato eliminado que diz votar em Flávio num 2º turno contra Lula (pesquisas em RUNOFF_TRANSFER, data.js) */
+  transfer: Object.fromEntries(Object.entries(RUNOFF_TRANSFER).map(([k, t]) => [k, t.flavio])),
+  /* dos que não vão para Flávio, % que vota em Lula; o resto anula, vota em branco ou não vota (sai dos válidos) */
+  restToLula: 50,
   runoffNoise: 1.5,
 
   average(polls, opts = {}) {
@@ -57,12 +59,12 @@ const Model = {
   /* participação de a e b no 2º turno (% dos válidos), redistribuindo os eliminados */
   runoffShares(s, a, b) {
     let A = s[a], B = s[b];
+    const rightIsA = a === 'flavio', rightIsB = b === 'flavio';
     for (const k in s) { if (k === a || k === b) continue;
-      const toFlavio = (this.transfer[k] ?? 55) / 100;
-      /* quem vai para "direita" (Flávio) ou "esquerda/centro" (Lula) conforme o lado do finalista */
-      const rightIsA = a === 'flavio', rightIsB = b === 'flavio';
-      if (rightIsA) { A += s[k] * toFlavio; B += s[k] * (1 - toFlavio); }
-      else if (rightIsB) { B += s[k] * toFlavio; A += s[k] * (1 - toFlavio); }
+      /* sem pesquisa para o candidato: metade vai para Flávio */
+      const toFlavio = (this.transfer[k] ?? 50) / 100, toOther = (1 - toFlavio) * this.restToLula / 100;
+      if (rightIsA) { A += s[k] * toFlavio; B += s[k] * toOther; }
+      else if (rightIsB) { B += s[k] * toFlavio; A += s[k] * toOther; }
       else { A += s[k] / 2; B += s[k] / 2; }
     }
     const t = A + B; return [A / t * 100, B / t * 100];

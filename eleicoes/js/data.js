@@ -42,5 +42,18 @@ const POLLS = [
   { id: 'datafolha-0917', inst: 'Datafolha', date: '2026-09-17', n: 2000, valid: false, v: { lula: 39, flavio: 36, cury: 6, caiado: 4, renan: 3, zema: 2 }, src: 'https://exame.com/brasil/datafolha-lula-tem-39-e-flavio-35-no-primeiro-turno-das-eleicoes-2026/' },
   { id: 'quaest-0914',    inst: 'Quaest',    date: '2026-09-14', n: 2000, valid: false, v: { lula: 36, flavio: 31, cury: null, caiado: null, renan: null, zema: null }, src: 'https://revistaforum.com.br/politica/pesquisas-para-presidente-em-2026/' },
 ];
+/* Para onde vão os eleitores de cada candidato num 2º turno Lula x Flávio: % que diz votar em Flávio.
+   Média das pesquisas disponíveis; as fontes não trazem a divisão do restante entre Lula e branco/nulo (ver Model.restToLula). */
+const RUNOFF_SOURCES = {
+  datafolha: { inst: 'Datafolha', date: '2026-09-20', n: 2058, src: 'https://www.cartacapital.com.br/cartaexpressa/datafolha-detalha-a-migracao-de-votos-de-zema-caiado-e-renan-santos-no-2o-turno-veja-os-numeros/' },
+  quaest:    { inst: 'Quaest',    date: '2026-09-06', src: 'https://revistaoeste.com/politica/maioria-dos-eleitores-de-cury-renan-caiado-e-zema-votaria-em-flavio-no-2o-turno/' },
+};
+const RUNOFF_TRANSFER = {
+  zema:   { flavio: 59.5, by: { datafolha: 60, quaest: 59 } },
+  renan:  { flavio: 53,   by: { datafolha: 48, quaest: 58 } },
+  caiado: { flavio: 45,   by: { datafolha: 54, quaest: 36 } },
+  cury:   { flavio: 46,   by: { quaest: 46 } },
+  marcal: { flavio: 47,   by: { quaest: 47 } },
+};
 /* 2º turno estimulado Lula x Flávio (votos válidos) */
 const RUNOFF_POLLS = [{ inst: 'AtlasIntel', date: '2026-09-23', lula: 50.2, flavio: 49.8 }];
