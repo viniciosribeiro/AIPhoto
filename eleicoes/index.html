@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Eleições Brasil 2026 – Painel ao vivo</title>
+<meta name="description" content="Apuração em tempo real, previsões, pesquisas e mapa interativo das eleições brasileiras de 2026.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="flag">🇧🇷</span><div><h1>Eleições 2026</h1><small>Painel ao vivo · Presidente</small></div></div>
+  <div class="top-right">
+    <span id="liveChip" class="chip">Conectando…</span>
+    <button id="btnRefresh" class="icon" title="Atualizar agora" aria-label="Atualizar">⟳</button>
+    <button id="btnTheme" class="icon" title="Tema" aria-label="Alternar tema">◐</button>
+    <button id="btnSettings" class="icon" title="Fonte de dados" aria-label="Configurações">⚙</button>
+  </div>
+</header>
+<div id="banner" class="banner" hidden></div>
+<nav class="tabs" id="tabs">
+  <button data-tab="overview" class="on">Visão geral</button>
+  <button data-tab="map">Mapa</button>
+  <button data-tab="forecast">Previsões</button>
+  <button data-tab="polls">Pesquisas</button>
+  <button data-tab="states">Estados</button>
+  <button data-tab="cands">Candidatos</button>
+  <button data-tab="about">Fontes</button>
+</nav>
+<main>
+  <section id="overview" class="tab on"></section>
+  <section id="map" class="tab">
+    <div class="filters">
+      <label>Camada <select id="mapLayer"></select></label>
+      <label>Candidato <select id="mapCand"></select></label>
+      <label>Região <select id="mapRegion"><option value="">Todas</option></select></label>
+      <label>Visual <select id="mapStyle"><option value="geo">Mapa geográfico</option><option value="grid">Cartograma</option></select></label>
+      <input id="mapSearch" type="search" placeholder="Buscar estado…" list="ufList">
+      <datalist id="ufList"></datalist>
+    </div>
+    <div class="map-wrap">
+      <div id="mapBox"><div id="leaflet"></div><div id="gridMap" hidden></div><div id="legend" class="legend"></div></div>
+      <aside id="stateCard" class="card side"><p class="muted">Clique em um estado para ver os detalhes.</p></aside>
+    </div>
+  </section>
+  <section id="forecast" class="tab"></section>
+  <section id="polls" class="tab"></section>
+  <section id="states" class="tab"></section>
+  <section id="cands" class="tab"></section>
+  <section id="about" class="tab"></section>
+</main>
+<dialog id="settings">
+  <form method="dialog">
+    <h3>Fonte dos dados de apuração</h3>
+    <label>Modo
+      <select id="setMode">
+        <option value="auto">Automático – TSE 2026 (se disponível)</option>
+        <option value="replay2022">Replay oficial 1º turno 2022 (TSE)</option>
+        <option value="sim">Simulação de apuração (demonstração)</option>
+        <option value="off">Somente pesquisas e previsão</option>
+      </select></label>
+    <label>Ciclo TSE <input id="setCycle" value="ele2026"></label>
+    <label>Código da eleição presidencial (1º turno) <input id="setCode" placeholder="ex.: 544 em 2022 – veja resultados.tse.jus.br"></label>
+    <label>Atualização (segundos) <input id="setEvery" type="number" min="10" max="300" value="30"></label>
+    <menu><button value="cancel">Cancelar</button><button id="setSave" value="ok" class="primary">Salvar</button></menu>
+  </form>
+</dialog>
+<footer>Dados de apuração: TSE (resultados.tse.jus.br) · Malhas: IBGE · Pesquisas: institutos citados. Projeto independente, não oficial.</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/model.js"></script>
+<script src="js/live.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
