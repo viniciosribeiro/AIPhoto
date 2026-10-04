@@ -27,7 +27,7 @@ const Model = {
 
   randn() { let u = 0, v = 0; while (!u) u = Math.random(); v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); },
 
-  /* scale < 1 encolhe a incerteza do 1º turno (usado durante a apuração: quanto mais urnas, menos incerteza) */
+  /* scale encolhe a incerteza do 1º turno (1 = pesquisas; perto de 0 = apuração quase completa) */
   simulate(avg, n = 20000, scale = 1) {
     const keys = Object.keys(avg);
     const res = { n, first: {}, win: {}, runoff: 0, firstRound: 0, pairs: {}, dist: {} };
@@ -36,7 +36,7 @@ const Model = {
       const shock = this.randn() * 2.2 * scale;
       let s = {};
       keys.forEach(k => { s[k] = Math.max(0.1, avg[k] + this.randn() * (0.7 + 0.035 * avg[k]) * scale); });
-      if ('lula' in s) s.lula += shock; if ('flavio' in s) s.flavio -= shock * 0.8;
+      if (s.lula != null && s.flavio != null) { s.lula += shock; s.flavio -= shock * 0.8; }
       const t = keys.reduce((a, k) => a + s[k], 0); keys.forEach(k => s[k] = s[k] / t * 100);
       keys.forEach(k => res.dist[k].push(s[k]));
       const rank = keys.slice().sort((a, b) => s[b] - s[a]);
