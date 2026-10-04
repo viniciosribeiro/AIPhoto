@@ -44,7 +44,9 @@ const bars = (sh, keys, ci) => ranked(sh).filter(([k]) => !keys || keys.includes
 
 /* ---------- Visão geral ---------- */
 function renderOverview() {
-  const n = natNow(), L = leaderOf(n.shares), s = App.sim;
+  const n = natNow(), L = leaderOf(n.shares);
+  /* Durante a apuração as chances partem dos votos já contados, com incerteza que diminui conforme as urnas são apuradas. */
+  const s = n.live ? Model.simulate(n.shares, 6000, Math.max(0.05, 1 - n.pst / 100)) : App.sim;
   const pw = ranked(s.pWin).filter(x => x[1] >= .05);
   const stLead = STATES.map(st => leaderOf(stateNow(st.uf).shares).key);
   const cnt = k => stLead.filter(x => x === k).length;
@@ -66,7 +68,7 @@ function renderOverview() {
       <div class="card kpi"><b>${f1(s.pWin.flavio)}</b><span>Chance de Flávio vencer a eleição</span></div>
       <div class="card kpi" style="grid-column:1/-1"><b style="font-size:1rem">${RUNOFF_POLLS.map(r => `${r.inst}: Lula ${f1(r.lula)} × Flávio ${f1(r.flavio)}`).join(' · ')}</b><span>Pesquisa de 2º turno mais recente (${fD(RUNOFF_POLLS[0].date)})</span></div>
     </div>
-    <div class="card"><h2>Probabilidade de vencer a presidência</h2><div class="chartbox" style="height:240px"><canvas id="chWin"></canvas></div></div>
+    <div class="card"><h2>Probabilidade de vencer a presidência</h2>${n.live ? '<p class="small muted">Com base nos votos já apurados; o 2º turno usa a migração de votos da aba Previsões.</p>' : ''}<div class="chartbox" style="height:240px"><canvas id="chWin"></canvas></div></div>
     <div class="card"><h2>Evolução das pesquisas</h2><div class="chartbox" style="height:240px"><canvas id="chTrend"></canvas></div></div>
   </div>`;
   chart('chWin', { type: 'bar', data: { labels: pw.map(([k]) => cand(k).name), datasets: [{ data: pw.map(x => +x[1].toFixed(1)), backgroundColor: pw.map(([k]) => cand(k).color) }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { max: 100, ticks: { callback: v => v + '%' } } } } });
@@ -136,7 +138,7 @@ function renderStateCard(uf) {
     ${bars(n.shares, null)}
     ${n.live ? `<details><summary class="small">Projeção do modelo</summary>${bars(f)}</details>` : ''}
     <p class="small muted">2022 (1º turno, aprox.): Lula ${st.l22}% × Bolsonaro ${st.b22}%</p>
-    ${d && d.ea ? `<p class="small muted">Eleitores apurados: ${fN(d.ea)}${d.vb ? ` · brancos ${fN(d.vb)}` : ''}${d.tvn ? ` · nulos ${fN(d.tvn)}` : ''}</p>` : ''}`;
+    ${d && d.ea ? `<p class="small muted">Comparecimento: ${fN(d.ea)}${d.vb ? ` · brancos ${fN(d.vb)}` : ''}${d.tvn ? ` · nulos ${fN(d.tvn)}` : ''}</p>` : ''}`;
 }
 
 /* ---------- Previsões ---------- */
@@ -150,16 +152,18 @@ function renderForecast() {
       ${ranked(App.avg).map(([k, v]) => `<tr><td><i class="dot" style="background:${cand(k).color}"></i>${cand(k).name}</td><td class="r">${f1(v)}</td><td class="r">${f1(s.pFirst[k])}</td><td class="r"><b>${f1(s.pWin[k])}</b></td></tr>`).join('')}</table>
       <p><b>Chance de decidir no 1º turno:</b> ${f1(s.pFirstRound)} · <b>2º turno:</b> ${f1(s.pRunoff)}</p>
       <p class="small muted">Confrontos mais prováveis no 2º turno: ${s.pairs.slice(0, 3).map(p => `${cand(p.a).name} × ${cand(p.b).name} (${f1(p.p)})`).join(' · ') || '–'}</p></div>
-    <div class="card"><h2>Hipóteses do 2º turno</h2><p class="small muted">Que % dos eleitores de cada candidato eliminado migra para Flávio Bolsonaro (o restante vai para Lula). Ajuste e veja o efeito.</p>
-      ${['cury', 'caiado', 'renan', 'zema'].map(k => `<label class="small">${cand(k).name}: <b id="tv_${k}">${Model.transfer[k]}</b>% → Flávio<input type="range" min="0" max="100" value="${Model.transfer[k]}" data-k="${k}"></label>`).join('')}
-      <label class="small">Ruído do 2º turno (p.p.): <b id="tv_noise">${Model.runoffNoise}</b><input type="range" min="0" max="5" step=".5" value="${Model.runoffNoise}" data-k="noise"></label></div>
+    <div class="card"><h2>Hipóteses do 2º turno</h2><p class="small muted">Que % dos eleitores de cada candidato eliminado vota em Flávio Bolsonaro. Os valores iniciais vêm das pesquisas abaixo. Ajuste e veja o efeito.</p>
+      ${['cury', 'caiado', 'renan', 'zema'].map(k => `<label class="small">${cand(k).name}: <b id="tv_${k}">${Model.transfer[k]}</b>% → Flávio<input type="range" min="0" max="100" step=".5" value="${Model.transfer[k]}" data-k="${k}"></label>`).join('')}
+      <label class="small">Dos que não vão para Flávio, % que vota em Lula: <b id="tv_rest">${Model.restToLula}</b>% (o resto: branco, nulo ou abstenção)<input type="range" min="0" max="100" step="5" value="${Model.restToLula}" data-k="rest"></label>
+      <label class="small">Ruído do 2º turno (p.p.): <b id="tv_noise">${Model.runoffNoise}</b><input type="range" min="0" max="5" step=".5" value="${Model.runoffNoise}" data-k="noise"></label>
+      <p class="small muted">Fontes: ${Object.entries(RUNOFF_TRANSFER).map(([k, t]) => `${cand(k).name} ${Object.entries(t.by).map(([i, v]) => `${RUNOFF_SOURCES[i].inst} ${v}%`).join(', ')}`).join(' · ')}. ${Object.values(RUNOFF_SOURCES).map(r => `<a href="${r.src}" target="_blank" rel="noopener">${r.inst} ${fD(r.date)}</a>`).join(', ')}. As pesquisas não dizem quantos dos demais votam em Lula ou anulam; essa divisão é uma hipótese ajustável.</p></div>
     <div class="card"><h2>Projeção por estado</h2><div class="tw" style="max-height:340px;overflow:auto"><table><tr><th>UF</th><th>Líder</th><th class="r">Lula</th><th class="r">Flávio</th></tr>
       ${STATES.slice().sort((a, b) => b.voters - a.voters).map(st => { const sh = App.fc[st.uf], l = leaderOf(sh); return `<tr class="click" data-uf="${st.uf}"><td>${st.uf}</td><td><i class="dot" style="background:${cand(l.key).color}"></i>${cand(l.key).name}</td><td class="r">${f1(sh.lula)}</td><td class="r">${f1(sh.flavio)}</td></tr>`; }).join('')}</table></div></div>
   </div>
   <p class="small muted">Modelo estatístico simples e transparente — não é previsão oficial. Pesquisas erram; o erro histórico de institutos no Brasil costuma passar de 3 p.p. por candidato.</p>`;
   chart('chFc', { type: 'bar', data: { labels: keys.map(k => cand(k).name), datasets: [{ data: keys.map(k => +App.avg[k].toFixed(1)), backgroundColor: keys.map(k => cand(k).color) }] },
     options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${f1(c.parsed.y)} (IC90: ${f1(s.ci[keys[c.dataIndex]][0])} – ${f1(s.ci[keys[c.dataIndex]][1])})` } } }, scales: { y: { ticks: { callback: v => v + '%' } } } } });
-  $$('#forecast input[type=range]').forEach(r => r.oninput = () => { const k = r.dataset.k; if (k === 'noise') Model.runoffNoise = +r.value; else Model.transfer[k] = +r.value; $('#tv_' + k).textContent = r.value; clearTimeout(App.t); App.t = setTimeout(() => { App.sim = Model.simulate(App.avg, 12000); renderForecast(); renderOverview(); }, 350); });
+  $$('#forecast input[type=range]').forEach(r => r.oninput = () => { const k = r.dataset.k; if (k === 'noise') Model.runoffNoise = +r.value; else if (k === 'rest') Model.restToLula = +r.value; else Model.transfer[k] = +r.value; $('#tv_' + k).textContent = r.value; clearTimeout(App.t); App.t = setTimeout(() => { App.sim = Model.simulate(App.avg, 12000); renderForecast(); renderOverview(); }, 350); });
   $$('#forecast tr.click').forEach(r => r.onclick = () => { go('map'); selectState(r.dataset.uf); });
 }
 
@@ -224,7 +228,7 @@ function renderCands() {
 }
 function renderAbout() {
   $('#about').innerHTML = `<div class="card"><h2>Fontes e metodologia</h2>
-  <ul><li><b>Apuração:</b> arquivos JSON públicos do TSE (<code>resultados.tse.jus.br</code>), consultados pelo seu navegador a cada ${Live.cfg.every}s. Para o 1º turno de 2026 informe o código da eleição em ⚙ (Fonte dos dados). O modo <i>Replay 2022</i> usa o resultado oficial de 2022 para testar o painel.</li>
+  <ul><li><b>Apuração:</b> arquivos JSON públicos do TSE (<code>resultados.tse.jus.br</code>), consultados pelo seu navegador a cada ${Live.cfg.every}s. O código da eleição de 2026 (6257 no 1º turno) é detectado automaticamente e pode ser trocado em ⚙. O modo <i>Replay 2022</i> usa o resultado oficial de 2022 para testar o painel.</li>
   <li><b>Mapa:</b> malha estadual do IBGE (API de malhas v3). Se indisponível, usa-se um cartograma.</li>
   <li><b>Pesquisas:</b> ${POLLS.map(p => `<a href="${p.src}" target="_blank" rel="noopener">${p.inst} ${fD(p.date)}</a>`).join(', ')}. Adicione novas na aba Pesquisas ou em <code>js/data.js</code>.</li>
   <li><b>Previsão nacional:</b> média ponderada (tempo e amostra), normalizada para votos válidos; 12.000 simulações Monte Carlo com erro compartilhado Lula/Flávio; 2º turno com migração configurável.</li>

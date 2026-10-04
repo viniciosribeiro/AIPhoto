@@ -7,18 +7,24 @@ const Live = {
   status: 'idle', simP: 0, simSeed: null,
   save() { try { localStorage.setItem('cfg', JSON.stringify(this.cfg)); } catch (e) {} },
 
+  /* 2026 em diante: leiaute EA20 (resultado unificado) em dados/…-u.json. 2022 usava dados-simplificados/…-r.json. */
   url(uf) {
     let { cycle, code } = this.cfg; if (this.cfg.mode === 'replay2022') { cycle = 'ele2022'; code = '544'; }
     const c = String(code).padStart(6, '0'); uf = uf.toLowerCase();
-    return `${this.TSE}/${cycle}/${code}/dados-simplificados/${uf}/${uf}-c0001-e${c}-r.json`;
+    if (cycle === 'ele2022') return `${this.TSE}/${cycle}/${code}/dados-simplificados/${uf}/${uf}-c0001-e${c}-r.json`;
+    return `${this.TSE}/${cycle}/${code}/dados/${uf}/${uf}-c0001-e${c}-u.json`;
   },
   num: v => parseFloat(String(v ?? '0').replace(/\./g, '').replace(',', '.')) || 0,
   pct: v => parseFloat(String(v ?? '0').replace(',', '.')) || 0,
+  /* Aceita os dois leiautes: EA20 (carg[0].agr[].par[].cand[], totais em s/e/v) e o simplificado de 2022 (campos na raiz). */
   parse(j) {
-    const agr = (((j.carg || [])[0] || {}).agr || [])[0] || {};
-    const list = agr.cand || j.cand || [];
-    const cands = list.map(c => ({ n: c.n, name: c.nm, key: candKey(c.nm), votes: this.num(c.vap), pct: this.pct(c.pvap), elected: c.e === 's' }));
-    return { pst: this.pct(j.pst), ea: this.num(j.ea), pea: this.pct(j.pea), esi: this.num(j.esi), vb: this.num(j.vb), tvn: this.num(j.tvn), vv: this.num(j.vv), cands, ts: j.dg ? `${j.dg} ${j.hg || ''}` : null, raw: j };
+    const carg = (j.carg || [])[0] || {};
+    const list = (carg.agr || []).flatMap(a => a.par ? a.par.flatMap(p => p.cand || []) : (a.cand || []));
+    if (!list.length && j.cand) list.push(...j.cand);
+    const s = j.s || j, e = j.e || j, v = j.v || j;
+    const cands = list.map(c => ({ n: c.n, name: c.nmu || c.nm, key: candKey(c.nm) || candKey(c.nmu || ''), votes: this.num(c.vap), pct: this.pct(c.pvap), elected: c.st ? /^eleito/i.test(c.st) : c.e === 's' }))
+      .sort((a, b) => b.votes - a.votes);
+    return { pst: this.pct(s.pst), ea: this.num(e.c), vb: this.num(v.vb), tvn: this.num(v.tvn), vv: this.num(v.vv ?? v.vvc), cands, ts: j.dg ? `${j.dg} ${j.hg || ''}` : null, raw: j };
   },
   async get(uf) {
     const r = await fetch(this.url(uf), { cache: 'no-store' }); if (!r.ok) throw new Error(r.status);

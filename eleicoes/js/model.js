@@ -1,8 +1,10 @@
 /* Modelo de previsão: média ponderada de pesquisas + Monte Carlo + projeção por estado (swing sobre 2022). */
 const Model = {
   halfLifeDays: 14,
-  /* % de eleitores de cada candidato eliminado que migra para Flávio no 2º turno (restante → Lula) */
-  transfer: { cury: 50, caiado: 70, renan: 60, zema: 75, marcal: 65 },
+  /* % dos eleitores de cada candidato eliminado que diz votar em Flávio num 2º turno contra Lula (pesquisas em RUNOFF_TRANSFER, data.js) */
+  transfer: Object.fromEntries(Object.entries(RUNOFF_TRANSFER).map(([k, t]) => [k, t.flavio])),
+  /* dos que não vão para Flávio, % que vota em Lula; o resto anula, vota em branco ou não vota (sai dos válidos) */
+  restToLula: 50,
   runoffNoise: 1.5,
 
   average(polls, opts = {}) {
@@ -27,15 +29,16 @@ const Model = {
 
   randn() { let u = 0, v = 0; while (!u) u = Math.random(); v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); },
 
-  simulate(avg, n = 20000) {
+  /* scale encolhe a incerteza do 1º turno (1 = pesquisas; perto de 0 = apuração quase completa) */
+  simulate(avg, n = 20000, scale = 1) {
     const keys = Object.keys(avg);
     const res = { n, first: {}, win: {}, runoff: 0, firstRound: 0, pairs: {}, dist: {} };
     keys.forEach(k => { res.first[k] = 0; res.win[k] = 0; res.dist[k] = []; });
     for (let i = 0; i < n; i++) {
-      const shock = this.randn() * 2.2;
+      const shock = this.randn() * 2.2 * scale;
       let s = {};
-      keys.forEach(k => { s[k] = Math.max(0.1, avg[k] + this.randn() * (0.7 + 0.035 * avg[k])); });
-      s.lula += shock; s.flavio -= shock * 0.8;
+      keys.forEach(k => { s[k] = Math.max(0.1, avg[k] + this.randn() * (0.7 + 0.035 * avg[k]) * scale); });
+      if (s.lula != null && s.flavio != null) { s.lula += shock; s.flavio -= shock * 0.8; }
       const t = keys.reduce((a, k) => a + s[k], 0); keys.forEach(k => s[k] = s[k] / t * 100);
       keys.forEach(k => res.dist[k].push(s[k]));
       const rank = keys.slice().sort((a, b) => s[b] - s[a]);
@@ -56,12 +59,12 @@ const Model = {
   /* participação de a e b no 2º turno (% dos válidos), redistribuindo os eliminados */
   runoffShares(s, a, b) {
     let A = s[a], B = s[b];
+    const rightIsA = a === 'flavio', rightIsB = b === 'flavio';
     for (const k in s) { if (k === a || k === b) continue;
-      const toFlavio = (this.transfer[k] ?? 55) / 100;
-      /* quem vai para "direita" (Flávio) ou "esquerda/centro" (Lula) conforme o lado do finalista */
-      const rightIsA = a === 'flavio', rightIsB = b === 'flavio';
-      if (rightIsA) { A += s[k] * toFlavio; B += s[k] * (1 - toFlavio); }
-      else if (rightIsB) { B += s[k] * toFlavio; A += s[k] * (1 - toFlavio); }
+      /* sem pesquisa para o candidato: metade vai para Flávio */
+      const toFlavio = (this.transfer[k] ?? 50) / 100, toOther = (1 - toFlavio) * this.restToLula / 100;
+      if (rightIsA) { A += s[k] * toFlavio; B += s[k] * toOther; }
+      else if (rightIsB) { B += s[k] * toFlavio; A += s[k] * toOther; }
       else { A += s[k] / 2; B += s[k] / 2; }
     }
     const t = A + B; return [A / t * 100, B / t * 100];
