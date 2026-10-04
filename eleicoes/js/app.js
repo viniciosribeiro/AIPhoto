@@ -44,7 +44,9 @@ const bars = (sh, keys, ci) => ranked(sh).filter(([k]) => !keys || keys.includes
 
 /* ---------- Visão geral ---------- */
 function renderOverview() {
-  const n = natNow(), L = leaderOf(n.shares), s = App.sim;
+  const n = natNow(), L = leaderOf(n.shares);
+  /* Durante a apuração as chances partem dos votos já contados, com incerteza que diminui conforme as urnas são apuradas. */
+  const s = n.live ? Model.simulate(n.shares, 6000, Math.max(0.05, 1 - n.pst / 100)) : App.sim;
   const pw = ranked(s.pWin).filter(x => x[1] >= .05);
   const stLead = STATES.map(st => leaderOf(stateNow(st.uf).shares).key);
   const cnt = k => stLead.filter(x => x === k).length;
@@ -66,7 +68,7 @@ function renderOverview() {
       <div class="card kpi"><b>${f1(s.pWin.flavio)}</b><span>Chance de Flávio vencer a eleição</span></div>
       <div class="card kpi" style="grid-column:1/-1"><b style="font-size:1rem">${RUNOFF_POLLS.map(r => `${r.inst}: Lula ${f1(r.lula)} × Flávio ${f1(r.flavio)}`).join(' · ')}</b><span>Pesquisa de 2º turno mais recente (${fD(RUNOFF_POLLS[0].date)})</span></div>
     </div>
-    <div class="card"><h2>Probabilidade de vencer a presidência</h2><div class="chartbox" style="height:240px"><canvas id="chWin"></canvas></div></div>
+    <div class="card"><h2>Probabilidade de vencer a presidência</h2>${n.live ? '<p class="small muted">Com base nos votos já apurados; o 2º turno usa a migração de votos da aba Previsões.</p>' : ''}<div class="chartbox" style="height:240px"><canvas id="chWin"></canvas></div></div>
     <div class="card"><h2>Evolução das pesquisas</h2><div class="chartbox" style="height:240px"><canvas id="chTrend"></canvas></div></div>
   </div>`;
   chart('chWin', { type: 'bar', data: { labels: pw.map(([k]) => cand(k).name), datasets: [{ data: pw.map(x => +x[1].toFixed(1)), backgroundColor: pw.map(([k]) => cand(k).color) }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { max: 100, ticks: { callback: v => v + '%' } } } } });
