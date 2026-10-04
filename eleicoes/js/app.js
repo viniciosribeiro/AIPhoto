@@ -136,7 +136,7 @@ function renderStateCard(uf) {
     ${bars(n.shares, null)}
     ${n.live ? `<details><summary class="small">Projeção do modelo</summary>${bars(f)}</details>` : ''}
     <p class="small muted">2022 (1º turno, aprox.): Lula ${st.l22}% × Bolsonaro ${st.b22}%</p>
-    ${d && d.ea ? `<p class="small muted">Eleitores apurados: ${fN(d.ea)}${d.vb ? ` · brancos ${fN(d.vb)}` : ''}${d.tvn ? ` · nulos ${fN(d.tvn)}` : ''}</p>` : ''}`;
+    ${d && d.ea ? `<p class="small muted">Comparecimento: ${fN(d.ea)}${d.vb ? ` · brancos ${fN(d.vb)}` : ''}${d.tvn ? ` · nulos ${fN(d.tvn)}` : ''}</p>` : ''}`;
 }
 
 /* ---------- Previsões ---------- */
@@ -224,7 +224,7 @@ function renderCands() {
 }
 function renderAbout() {
   $('#about').innerHTML = `<div class="card"><h2>Fontes e metodologia</h2>
-  <ul><li><b>Apuração:</b> arquivos JSON públicos do TSE (<code>resultados.tse.jus.br</code>), consultados pelo seu navegador a cada ${Live.cfg.every}s. Para o 1º turno de 2026 informe o código da eleição em ⚙ (Fonte dos dados). O modo <i>Replay 2022</i> usa o resultado oficial de 2022 para testar o painel.</li>
+  <ul><li><b>Apuração:</b> arquivos JSON públicos do TSE (<code>resultados.tse.jus.br</code>), consultados pelo seu navegador a cada ${Live.cfg.every}s. O código da eleição de 2026 (6257 no 1º turno) é detectado automaticamente e pode ser trocado em ⚙. O modo <i>Replay 2022</i> usa o resultado oficial de 2022 para testar o painel.</li>
   <li><b>Mapa:</b> malha estadual do IBGE (API de malhas v3). Se indisponível, usa-se um cartograma.</li>
   <li><b>Pesquisas:</b> ${POLLS.map(p => `<a href="${p.src}" target="_blank" rel="noopener">${p.inst} ${fD(p.date)}</a>`).join(', ')}. Adicione novas na aba Pesquisas ou em <code>js/data.js</code>.</li>
   <li><b>Previsão nacional:</b> média ponderada (tempo e amostra), normalizada para votos válidos; 12.000 simulações Monte Carlo com erro compartilhado Lula/Flávio; 2º turno com migração configurável.</li>
