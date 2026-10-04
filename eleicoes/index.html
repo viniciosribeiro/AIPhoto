@@ -10,7 +10,7 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="flag">🇧🇷</span><div><h1>Eleições 2026</h1><small>Painel ao vivo · Presidente</small></div></div>
+  <div class="brand"><svg class="flag" viewBox="0 0 28 20" width="34" height="24" aria-hidden="true"><rect width="28" height="20" rx="3" fill="#009c3b"/><path d="M14 2.5 25.5 10 14 17.5 2.5 10z" fill="#ffdf00"/><circle cx="14" cy="10" r="4.6" fill="#002776"/></svg><div><h1>Eleições 2026</h1><small>Painel ao vivo · Presidente</small></div></div>
   <div class="top-right">
     <span id="liveChip" class="chip">Conectando…</span>
     <button id="btnRefresh" class="icon" title="Atualizar agora" aria-label="Atualizar">⟳</button>
@@ -61,7 +61,7 @@
         <option value="off">Somente pesquisas e previsão</option>
       </select></label>
     <label>Ciclo TSE <input id="setCycle" value="ele2026"></label>
-    <label>Código da eleição presidencial (1º turno) <input id="setCode" placeholder="ex.: 544 em 2022 – veja resultados.tse.jus.br"></label>
+    <label>Código da eleição presidencial (1º turno) <input id="setCode" placeholder="6257 = 1º turno 2026 · 6258 = 2º turno"></label>
     <label>Atualização (segundos) <input id="setEvery" type="number" min="10" max="300" value="30"></label>
     <menu><button value="cancel">Cancelar</button><button id="setSave" value="ok" class="primary">Salvar</button></menu>
   </form>
