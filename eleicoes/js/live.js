@@ -1,7 +1,7 @@
 /* Dados ao vivo: TSE (apuração) e IBGE (malha). Tudo roda no navegador do visitante. */
 const Live = {
   TSE: 'https://resultados.tse.jus.br/oficial',
-  probe: ['9240', '9238', '9244', '9560', '9564', '544'],  /* códigos candidatos; defina o correto em ⚙ */
+  probe: ['6257', '6258'],  /* 1º turno 2026 = 6257, 2º turno = 6258; outro código pode ser definido em ⚙ */
   cfg: Object.assign({ mode: 'auto', cycle: 'ele2026', code: '', every: 30 }, (() => { try { return JSON.parse(localStorage.getItem('cfg') || '{}'); } catch (e) { return {}; } })()),
   cache: { national: null, states: {} },
   status: 'idle', simP: 0, simSeed: null,
