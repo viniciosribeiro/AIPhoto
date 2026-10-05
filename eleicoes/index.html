@@ -34,14 +34,18 @@
     <div class="filters">
       <label>Camada <select id="mapLayer"></select></label>
       <label>Candidato <select id="mapCand"></select></label>
+      <label id="mapHeightL">Altura (3D) <select id="mapHeight"><option value="auto">Automática</option><option value="apur">Votos apurados</option><option value="voters">Eleitorado</option><option value="margin">Margem do líder</option><option value="cand">% do candidato</option></select></label>
       <label>Região <select id="mapRegion"><option value="">Todas</option></select></label>
-      <label>Visual <select id="mapStyle"><option value="geo">Mapa geográfico</option><option value="grid">Cartograma</option></select></label>
+      <label>Visual <select id="mapStyle"><option value="3d">3D imersivo</option><option value="geo">Mapa geográfico</option><option value="grid">Cartograma</option></select></label>
       <input id="mapSearch" type="search" placeholder="Buscar estado…" list="ufList">
       <datalist id="ufList"></datalist>
     </div>
     <div class="map-wrap">
-      <div id="mapBox"><div id="leaflet"></div><div id="gridMap" hidden></div><div id="legend" class="legend"></div></div>
-      <aside id="stateCard" class="card side"><p class="muted">Clique em um estado para ver os detalhes.</p></aside>
+      <div id="mapBox"><div id="map3d" hidden><div class="m3-hud"><button id="m3Rotate" class="on" title="Girar automaticamente">⟲ Girar</button><button id="m3Home" title="Voltar à visão inicial">⌂ Brasil</button><button id="m3Full" title="Tela cheia">⛶ Tela cheia</button></div></div><div id="leaflet"></div><div id="gridMap" hidden></div><div id="legend" class="legend"></div></div>
+      <div class="side">
+        <aside id="probPanel" class="card prob"></aside>
+        <aside id="stateCard" class="card"><p class="muted">Clique em um estado para ver os detalhes.</p></aside>
+      </div>
     </div>
   </section>
   <section id="forecast" class="tab"></section>
@@ -69,9 +73,12 @@
 <footer>Dados de apuração: TSE (resultados.tse.jus.br) · Malhas: IBGE · Pesquisas: institutos citados. Projeto independente, não oficial.</footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script src="js/data.js"></script>
 <script src="js/model.js"></script>
 <script src="js/live.js"></script>
+<script src="js/map3d.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
